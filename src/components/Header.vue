@@ -1,8 +1,6 @@
 <script setup>
 import { useStore } from "../store";
 import { useRouter } from "vue-router";
-import {onAuthStateChnaged} from "firebase/auth";
-import {auth} from "../firebase";
 
 const store = useStore();
 const router = useRouter();
