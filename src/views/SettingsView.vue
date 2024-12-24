@@ -1,16 +1,42 @@
 <script setup>
 import { useStore } from "../store";
 import { ref } from "vue";
+import { updateProfile, updateEmail } from "firebase/auth";
+import { auth } from "../firebase";  // Make sure Firebase is initialized
 
 const store = useStore();
 
 const firstName = ref(store.firstName);
 const lastName = ref(store.lastName);
+const password = ref(""); // For password change
 
-const saveChanges = () => {
-  store.firstName = firstName.value;
-  store.lastName = lastName.value;
-  alert("Your changes have been saved!");
+// Check if user is logged in via email
+const isEmailUser = store.user && store.user.providerData[0].providerId === 'password';
+
+const saveChanges = async () => {
+  // Update user's profile in Firebase (first name and last name)
+  if (isEmailUser) {
+    try {
+      // Update display name in Firebase
+      await updateProfile(auth.currentUser, {
+        displayName: `${firstName.value} ${lastName.value}`,
+      });
+
+      // Optionally, update the email if needed
+      // await updateEmail(auth.currentUser, newEmail); // Example if email update is needed
+
+      // Update Pinia store
+      store.firstName = firstName.value;
+      store.lastName = lastName.value;
+
+      alert("Your changes have been saved!");
+    } catch (error) {
+      console.error("Error saving changes:", error);
+      alert("Error saving changes!");
+    }
+  } else {
+    alert("You can only edit your details if logged in with email.");
+  }
 };
 </script>
 
@@ -20,17 +46,43 @@ const saveChanges = () => {
 
     <div class="user-info">
       <label for="first-name">First Name:</label>
-      <input id="first-name" v-model="firstName" type="text" />
+      <input
+        id="first-name"
+        v-model="firstName"
+        type="text"
+        :disabled="!isEmailUser"
+      />
     </div>
 
     <div class="user-info">
       <label for="last-name">Last Name:</label>
-      <input id="last-name" v-model="lastName" type="text" />
+      <input
+        id="last-name"
+        v-model="lastName"
+        type="text"
+        :disabled="!isEmailUser"
+      />
     </div>
 
     <div class="user-info">
       <label for="email">Email:</label>
-      <input id="email" v-model="store.email" type="email" disabled />
+      <input
+        id="email"
+        v-model="store.user?.email"
+        type="email"
+        disabled
+      />
+    </div>
+
+    <!-- Only show password change input if logged in with email -->
+    <div v-if="isEmailUser" class="user-info">
+      <label for="password">Change Password:</label>
+      <input
+        id="password"
+        v-model="password"
+        type="password"
+        placeholder="Enter new password"
+      />
     </div>
 
     <button @click="saveChanges">Save Changes</button>

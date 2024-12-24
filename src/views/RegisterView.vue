@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleA
 import { auth } from "../firebase";
 import { useRouter } from "vue-router";
 
+// Data bindings
 const firstName = ref("");
 const lastName = ref("");
 const email = ref("");
@@ -11,6 +12,7 @@ const password = ref("");
 const confirmPassword = ref("");
 const router = useRouter();
 
+// Handle Registration
 const handleRegister = async () => {
   if (!firstName.value || !lastName.value || !email.value || !password.value || !confirmPassword.value) {
     alert("All fields are required.");
@@ -23,22 +25,26 @@ const handleRegister = async () => {
   }
 
   try {
+    // Check if email is already in use
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCredential.user;
+
+    // Update user profile (first name, last name)
     await updateProfile(user, { displayName: `${firstName.value} ${lastName.value}` });
     alert("Registration successful!");
-    router.push("/movies/all");
+    router.push("/movies");
   } catch (error) {
     console.error(error);
     alert("Error during registration: " + error.message);
   }
 };
 
+// Register via Google
 const registerByGoogle = async () => {
   try {
     const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
     alert("Google registration successful!");
-    router.push("/movies/all");
+    router.push("/movies");
   } catch (error) {
     console.error(error);
     alert("Error during Google registration: " + error.message);
