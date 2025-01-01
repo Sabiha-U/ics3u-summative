@@ -3,7 +3,7 @@ import { RouterLink } from 'vue-router';
 import Footer from "../components/Footer.vue";
 import Header from "../components/Header.vue";
 import Hero from "../components/Hero.vue";
-import Features from "../components/features.vue"; 
+import Features from "../components/Features.vue"; 
 </script>
 
 <template>

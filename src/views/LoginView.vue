@@ -1,38 +1,24 @@
 <script setup>
-import { useRouter } from 'vue-router';
-import { ref } from 'vue';
-import { useStore } from "../store"
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "../firebase";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useStore } from "../store";
+import { auth } from "../firebase"
 
-// Initialize store and router
+// Initialize Pinia store and router
 const store = useStore();
 const router = useRouter();
-const email = ref('');
-const password = ref('');
 
-// Login with email and password
-const loginByEmail = async () => {
-  try {
-    // Check if email is registered
-    const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
-    store.user = userCredential.user;  // Update the store with the logged-in user
-    router.push("/movies");  // Navigate to the movies page
-  } catch (error) {
-    console.log(error);
-    alert("There was an error signing in with email! Make sure you're registered first.");
-  }
-};
+// Variables to store email and password input
+const email = ref("");
+const password = ref("");
 
-// Login with Google
-const loginByGoogle = async () => {
-  try {
-    const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
-    store.user = userCredential.user;  // Update the store with the logged-in user
-    router.push("/movies");  // Navigate to the movies page
-  } catch (error) {
-    console.log(error);
-    alert("There was an error signing in with Google!");
+const handleLogin = () => {
+  store.loginUser(email.value, password.value);   //  this checks if the entered email and password match the ones in the store
+
+  if (store.isLoggedIn) {
+    router.push("/movies");  // this redirects to the movies page if your logged in
+  } else {
+    alert("Invalid email or password.");
   }
 };
 </script>
@@ -41,18 +27,16 @@ const loginByGoogle = async () => {
   <div class="login-container">
     <div class="login-box">
       <h2>Login</h2>
-      <form @submit.prevent="loginByEmail">
+      <form @submit.prevent="handleLogin">
         <input v-model="email" type="email" placeholder="Enter your Email" class="input-field" required />
         <input v-model="password" type="password" placeholder="Enter your Password" class="input-field" required />
         <button type="submit" class="login-btn">Login</button>
       </form>
-      <button @click="loginByGoogle" class="button login">Login with Google</button>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Your existing styles */
 .login-container {
   position: absolute;
   top: 50%;

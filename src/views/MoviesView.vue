@@ -2,6 +2,7 @@
 import Header from "../components/Header.vue";
 import Genres from "../components/Genres.vue";
 import Footer from "../components/Footer.vue";
+import { auth } from '../firebase';
 
 const genresList = [
   {

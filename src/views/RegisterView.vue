@@ -1,20 +1,20 @@
 <script setup>
 import { ref } from "vue";
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "../firebase";
+import { useStore } from "../store";
 import { useRouter } from "vue-router";
+import { auth } from "../firebase";
 
-// Data bindings
+const store = useStore();
+const router = useRouter();
+
 const firstName = ref("");
 const lastName = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
-const router = useRouter();
 
-// Handle Registration
-const handleRegister = async () => {
-  if (!firstName.value || !lastName.value || !email.value || !password.value || !confirmPassword.value) {
+const handleRegister = () => {
+  if (!firstName.value, !lastName.value, !email.value, !password.value, !confirmPassword.value) {
     alert("All fields are required.");
     return;
   }
@@ -24,46 +24,31 @@ const handleRegister = async () => {
     return;
   }
 
-  try {
-    // Check if email is already in use
-    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
-    const user = userCredential.user;
+  store.registerUser({
+    firstName: firstName.value,
+    lastName: lastName.value,
+    email: email.value,
+    password: password.value,
+  });
 
-    // Update user profile (first name, last name)
-    await updateProfile(user, { displayName: `${firstName.value} ${lastName.value}` });
-    alert("Registration successful!");
-    router.push("/movies");
-  } catch (error) {
-    console.error(error);
-    alert("Error during registration: " + error.message);
-  }
-};
-
-// Register via Google
-const registerByGoogle = async () => {
-  try {
-    const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
-    alert("Google registration successful!");
-    router.push("/movies");
-  } catch (error) {
-    console.error(error);
-    alert("Error during Google registration: " + error.message);
-  }
+  router.push("/movies");
 };
 </script>
 
 <template>
   <div class="register-container">
-    <h2>Create An Account</h2>
-    <form @submit.prevent="handleRegister">
-      <input v-model="firstName" type="text" placeholder="First Name" class="input-field" required />
-      <input v-model="lastName" type="text" placeholder="Last Name" class="input-field" required />
-      <input v-model="email" type="email" placeholder="Email" class="input-field" required />
-      <input v-model="password" type="password" placeholder="Password" class="input-field" required />
-      <input v-model="confirmPassword" type="password" placeholder="Confirm Password" class="input-field" required />
-      <button type="submit" class="login-btn">Register</button>
-    </form>
-    <button @click="registerByGoogle" class="google-btn">Register with Google</button>
+    <div class="register-box">
+      <h2>Create An Account</h2>
+      <form @submit.prevent="handleRegister">
+        <input v-model="firstName" type="text" placeholder="Enter your First Name" class="input-field" required />
+        <input v-model="lastName" type="text" placeholder="Enter your Last Name" class="input-field" required />
+        <input v-model="email" type="email" placeholder="Enter your Email" class="input-field" required />
+        <input v-model="password" type="password" placeholder="Enter your password" class="input-field" required />
+        <input v-model="confirmPassword" type="password" placeholder="Re-enter your password" class="input-field"
+          required />
+        <button type="submit" class="login-btn">Register</button>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -81,11 +66,6 @@ const registerByGoogle = async () => {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
   color: white;
   z-index: 1;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
 }
 
 .register-container h2 {
@@ -111,7 +91,7 @@ form {
   outline: none;
 }
 
-.login-btn, .google-btn {
+.login-btn {
   background-color: #FFD700;
   color: black;
   padding: 15px 30px;
@@ -124,9 +104,9 @@ form {
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.login-btn:hover, .google-btn:hover {
+.login-btn:hover {
   background-color: #FFC107;
-  transform: translateY(-3px);
+  transform: translateY(-5px);
 }
 
 @media (max-width: 480px) {
