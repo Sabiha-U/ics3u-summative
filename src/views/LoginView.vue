@@ -2,23 +2,40 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "../store";
-import { auth } from "../firebase"
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "../firebase";
 
-// Initialize Pinia store and router
 const store = useStore();
 const router = useRouter();
 
-// Variables to store email and password input
 const email = ref("");
 const password = ref("");
 
-const handleLogin = () => {
-  store.loginUser(email.value, password.value);   //  this checks if the entered email and password match the ones in the store
+const handleLogin = async () => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
+    store.user = userCredential.user;
+    router.push("/movies");
+  } catch (error) {
+    if (error.code === 'auth/wrong-password') {
+      alert("Incorrect email or password.");
+    }
+    else if (error.code === 'auth/user-not-found') {
+      alert("User not found. Please register first.");
+    }
+    else {
+      alert("An error occurred. Please try again.");
+    }
+  }
+};
 
-  if (store.isLoggedIn) {
-    router.push("/movies");  // this redirects to the movies page if your logged in
-  } else {
-    alert("Invalid email or password.");
+const loginByGoogle = async () => {
+  try {
+    const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
+    store.user = userCredential.user;
+    router.push("/movies");
+  } catch (error) {
+    alert("There was an error signing in with Google!");
   }
 };
 </script>
@@ -32,6 +49,7 @@ const handleLogin = () => {
         <input v-model="password" type="password" placeholder="Enter your Password" class="input-field" required />
         <button type="submit" class="login-btn">Login</button>
       </form>
+      <button @click="loginByGoogle" class="google-btn">Login with Google</button>
     </div>
   </div>
 </template>
@@ -47,9 +65,8 @@ const handleLogin = () => {
   padding: 40px;
   width: 400px;
   text-align: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
   color: white;
-  z-index: 1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
 }
 
 .login-container h2 {
@@ -59,43 +76,37 @@ const handleLogin = () => {
 }
 
 .input-field {
-  width: 100%;
-  padding: 15px;
+  width: 90%;
+  padding: 10px;
   margin: 10px 0;
   border-radius: 5px;
   border: 1px solid #ccc;
-  background-color: #333;
+  background: #333;
   color: #fff;
-  font-size: 1.1em;
-  box-sizing: border-box;
-}
-
-.input-field:focus {
-  border-color: #FFD700;
-  outline: none;
+  font-size: 1em;
 }
 
 button {
-  background-color: #FFD700;
-  color: black;
-  padding: 15px 30px;
-  border: none;
-  border-radius: 30px;
-  font-size: 1.2em;
-  cursor: pointer;
   width: 100%;
-  margin: 2px;
-  transition: background-color 0.3s ease, transform 0.3s ease;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.login-btn {
+  background: #FFD700;
+  color: black;
+}
+
+.google-btn {
+  background: #4285F4;
+  color: white;
 }
 
 button:hover {
-  background-color: #FFC107;
-  transform: translateY(-5px);
-}
-
-@media (max-width: 480px) {
-  .login-container {
-    width: 90%;
-  }
+  opacity: 0.9;
 }
 </style>

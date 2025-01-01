@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useStore } from "../store";
 import { useRouter } from "vue-router";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth } from "../firebase";
 
 const store = useStore();
@@ -13,8 +14,8 @@ const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 
-const handleRegister = () => {
-  if (!firstName.value, !lastName.value, !email.value, !password.value, !confirmPassword.value) {
+const handleRegister = async () => {
+  if (!firstName.value || !lastName.value || !email.value || !password.value || !confirmPassword.value) {
     alert("All fields are required.");
     return;
   }
@@ -24,14 +25,26 @@ const handleRegister = () => {
     return;
   }
 
-  store.registerUser({
-    firstName: firstName.value,
-    lastName: lastName.value,
-    email: email.value,
-    password: password.value,
-  });
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+    const user = userCredential.user;
+    await updateProfile(user, { displayName: `${firstName.value} ${lastName.value}` });
+    store.user = user;
+    router.push("/movies");
+  } catch (error) { 
+      alert ("This was am error registering this email!");
+    }
+  }
 
-  router.push("/movies");
+const registerByGoogle = async () => {
+  try {
+    const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
+    const user = userCredential.user;
+    store.user = user;
+    router.push("/movies");
+  } catch (error) {
+    alert("There was an error creating a user with Google!");
+  }
 };
 </script>
 
@@ -49,6 +62,7 @@ const handleRegister = () => {
         <button type="submit" class="login-btn">Register</button>
       </form>
     </div>
+    <button @click="registerByGoogle" class="button register">Register by Google</button>
   </div>
 </template>
 
@@ -106,6 +120,25 @@ const handleRegister = () => {
 
 .login-btn:hover {
   background-color: #FFC107;
+  transform: translateY(-5px);
+}
+
+/* Styles for Register by Google Button */
+.button.register {
+  background-color: #4285F4;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.2em;
+  cursor: pointer;
+  width: 100%;
+  margin: 10px 0;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.button.register:hover {
+  background-color: #357AE8;
   transform: translateY(-5px);
 }
 

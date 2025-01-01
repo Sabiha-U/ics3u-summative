@@ -7,7 +7,21 @@ const router = useRouter();
 
 const removeFromCart = (movieId) => {
     store.cart.delete(movieId);
-}
+};
+
+const checkout = () => {
+  if (store.cart.size === 0) {
+    alert('Your cart is empty. Add some movies to your cart before checking out.');
+    return; 
+  }
+  store.cart.clear();
+  localStorage.removeItem(`cart_${store.user?.email}`);
+ 
+  // this shows a thank you message after clearing the cart
+  setTimeout(() => {
+    alert('Thank you for your purchase!');
+  }, 500); // Delay the message a bit for better UX
+};
 </script>
 
 <template>
@@ -18,6 +32,7 @@ const removeFromCart = (movieId) => {
       <h2>{{ movie.title }}</h2>
       <button @click="removeFromCart(key)">Remove</button>
     </div>
+    <button @click="checkout" class="checkout-btn">Checkout</button>
   </div>
 </template>
 
@@ -74,6 +89,23 @@ const removeFromCart = (movieId) => {
 
 .cart-item button:hover {
   background-color: #ff1e2d;
+  transform: scale(1.05);
+}
+
+.checkout-btn {
+  margin-top: 20px;
+  padding: 12px 20px;
+  background-color: #D4AF37;
+  color: black;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.checkout-btn:hover {
+  background-color: #FFD700;
   transform: scale(1.05);
 }
 

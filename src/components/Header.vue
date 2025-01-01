@@ -1,22 +1,22 @@
 <script setup>
-import { useStore } from "../store";
-import { useRouter } from "vue-router";
+import { useStore } from '../store';
+import { useRouter } from 'vue-router';
 import { auth } from "../firebase";
 
 const store = useStore();
 const router = useRouter();
 
 const goToCart = () => {
-  router.push("/cart");
+  router.push('/cart');
 };
 
 const goToSettings = () => {
-  router.push("/settings");
+  router.push('/settings');
 };
 
 const logout = () => {
   store.logoutUser();
-  router.push("/");
+  router.push('/');
 };
 </script>
 
@@ -26,18 +26,22 @@ const logout = () => {
       <div class="logo">
         <img src="/src/assets/Logo.webp" alt="CinemaVibe Logo" class="logo-img" />
       </div>
+
       <div v-if="store.isLoggedIn" class="user-actions">
-        <span class="welcome-msg">Hello, {{ store.firstName }}!</span>
+        <span class="welcome-msg">Hello, {{ store.user.displayName || store.firstName }}!</span>
       </div>
+
       <div class="navbar">
         <div class="search-container">
           <input type="text" placeholder="Search for movies..." class="search-input" />
           <img src="/src/assets/searchIcon.png" alt="Search Icon" class="search-icon" />
         </div>
+
         <div v-if="!store.isLoggedIn">
           <RouterLink to="/login" class="button login">Login</RouterLink>
           <RouterLink to="/register" class="button register">Register</RouterLink>
         </div>
+
         <div v-else class="user-actions">
           <div class="settings-icon" @click="goToSettings">
             <img src="/src/assets/SettingsIcon.png" alt="Settings Icon" />
