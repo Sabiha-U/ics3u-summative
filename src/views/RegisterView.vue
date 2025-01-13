@@ -30,9 +30,10 @@ const handleRegister = async () => {
     const user = userCredential.user;
     await updateProfile(user, { displayName: `${firstName.value} ${lastName.value}` });
     store.user = user;
+    alert ("Sucessful registration")
     router.push("/movies");
   } catch (error) { 
-      alert ("This was am error registering this email!");
+      alert ("This was an error registering this email!");
     }
   }
 
