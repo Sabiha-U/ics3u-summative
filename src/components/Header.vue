@@ -1,7 +1,6 @@
 <script setup>
 import { useStore } from '../store';
 import { useRouter } from 'vue-router';
-import { auth } from "../firebase";
 
 const store = useStore();
 const router = useRouter();
@@ -14,8 +13,8 @@ const goToSettings = () => {
   router.push('/settings');
 };
 
-const logout = () => {
-  store.logoutUser();
+const logout = async () => {
+  await store.logoutUser();
   router.push('/');
 };
 </script>
@@ -28,7 +27,7 @@ const logout = () => {
       </div>
 
       <div v-if="store.isLoggedIn" class="user-actions">
-        <span class="welcome-msg">Hello, {{ store.user.displayName || store.firstName }}!</span>
+        <span class="welcome-msg">Hello, {{ store.user.displayName || store.user.email }}!</span>
       </div>
 
       <div class="navbar">

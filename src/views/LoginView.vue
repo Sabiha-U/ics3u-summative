@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "../store";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, } from "firebase/auth";
 import { auth } from "../firebase";
 
 const store = useStore();
@@ -12,19 +12,23 @@ const email = ref("");
 const password = ref("");
 
 const handleLogin = async () => {
+  if (!email.value.trim() || !password.value.trim()) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
+    const userCredential = await signInWithEmailAndPassword(auth, email.value.trim(), password.value.trim());
     store.user = userCredential.user;
     router.push("/movies");
   } catch (error) {
-    if (error.code === 'auth/wrong-password') {
-      alert("Incorrect email or password.");
-    }
-    else if (error.code === 'auth/user-not-found') {
-      alert("User not found. Please register first.");
-    }
-    else {
-      alert("An error occurred. Please try again.");
+    if (error.code === "auth/user-not-found") {
+      alert("No user found with this email. Please register first.");
+    } else if (error.code === "auth/wrong-password") {
+      alert("Incorrect password. Please try again.");
+    } else {
+      console.error("Error suring login:", error);
+      alert("An error occurred while logging in. Please try again.");
     }
   }
 };
@@ -32,10 +36,18 @@ const handleLogin = async () => {
 const loginByGoogle = async () => {
   try {
     const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
-    store.user = userCredential.user;
+    const user = userCredential.user;
+
+    // this checks if the Google user is already registered
+    if (user.metadata.creationTime === user.metadata.lastSignInTime) {
+      alert("This Google account is not registered. Please register first.");
+      return;
+    }
+
+    store.user = user;
     router.push("/movies");
   } catch (error) {
-    alert("There was an error signing in with Google!");
+    alert("There was an error signing in with Google. Please try again.");
   }
 };
 </script>
