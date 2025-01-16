@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { useStore } from "../store";
 import { useRouter } from "vue-router";
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, } from "firebase/auth";
 import { auth } from "../firebase";
 
 const store = useStore();
@@ -15,7 +15,7 @@ const password = ref("");
 const confirmPassword = ref("");
 
 const handleRegister = async () => {
-  if (!firstName.value || !lastName.value || !email.value || !password.value || !confirmPassword.value) {
+  if (!firstName.value.trim() || !lastName.value.trim() || !email.value.trim() || !password.value || !confirmPassword.value) {
     alert("All fields are required.");
     return;
   }
@@ -28,23 +28,30 @@ const handleRegister = async () => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
     const user = userCredential.user;
-    await updateProfile(user, { displayName: `${firstName.value} ${lastName.value}` });
+    await updateProfile(user, { displayName: `${firstName.value.trim()} ${lastName.value.trim()}` });
     store.user = user;
     alert ("Sucessful registration")
     router.push("/movies");
   } catch (error) { 
       alert ("This was an error registering this email!");
     }
-  }
+};
 
 const registerByGoogle = async () => {
   try {
     const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
     const user = userCredential.user;
-    store.user = user;
-    router.push("/movies");
+
+    // checks if the user already exists in Firebase Authentication
+    if (user.metadata.creationTime === user.metadata.lastSignInTime) {
+      alert("Registration successful! Welcome.");
+      store.user = user;
+      router.push("/movies");
+    } else {
+      alert("This Google account is already registered. Please log in instead.");
+    }
   } catch (error) {
-    alert("There was an error creating a user with Google!");
+    alert("There was an error during registration with Google. Please try again.");
   }
 };
 </script>
@@ -57,8 +64,8 @@ const registerByGoogle = async () => {
         <input v-model="firstName" type="text" placeholder="Enter your First Name" class="input-field" required />
         <input v-model="lastName" type="text" placeholder="Enter your Last Name" class="input-field" required />
         <input v-model="email" type="email" placeholder="Enter your Email" class="input-field" required />
-        <input v-model="password" type="password" placeholder="Enter your password" class="input-field" required />
-        <input v-model="confirmPassword" type="password" placeholder="Re-enter your password" class="input-field"
+        <input v-model="password" type="password" placeholder="Enter your Password" class="input-field" required />
+        <input v-model="confirmPassword" type="password" placeholder="Re-enter your Password" class="input-field"
           required />
         <button type="submit" class="login-btn">Register</button>
       </form>
@@ -124,7 +131,6 @@ const registerByGoogle = async () => {
   transform: translateY(-5px);
 }
 
-/* Styles for Register by Google Button */
 .button.register {
   background-color: #4285F4;
   color: white;

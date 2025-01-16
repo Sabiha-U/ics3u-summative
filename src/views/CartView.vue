@@ -6,17 +6,18 @@ const store = useStore();
 const router = useRouter();
 
 const removeFromCart = (movieId) => {
-    store.cart.delete(movieId);
+  store.cart.delete(movieId);
+  store.saveCart();
 };
 
 const checkout = () => {
   if (store.cart.size === 0) {
     alert('Your cart is empty. Add some movies to your cart before checking out.');
-    return; 
+    return;
   }
   store.cart.clear();
   localStorage.removeItem(`cart_${store.user?.email}`);
- 
+
   // this shows a thank you message after clearing the cart
   setTimeout(() => {
     alert('Thank you for your purchase!');
