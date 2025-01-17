@@ -26,12 +26,12 @@ const routes = [
     {
         path: '/movies/:id',
         component: DetailsView,
-        meta: { auth: false },
+        meta: { auth: true },
     },
     {
         path: '/settings',
         component: SettingsView,
-        meta: { auth: false }
+        meta: { auth: true }
     },
 ];
 
