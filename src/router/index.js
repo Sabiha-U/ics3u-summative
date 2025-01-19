@@ -1,5 +1,6 @@
 import { createWebHistory, createRouter } from 'vue-router';
 import { useStore } from '../store';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import HomeView from '../views/HomeView.vue';
 import RegisterView from '../views/RegisterView.vue';
 import LoginView from '../views/LoginView.vue';
@@ -16,7 +17,7 @@ const routes = [
     {
         path: '/cart',
         component: CartView,
-        meta: { auth: false }
+        meta: { auth: true }
     },
     {
         path: '/movies',
@@ -35,22 +36,33 @@ const routes = [
     },
 ];
 
-// creates the router instance
+// this creates the router instance
 const router = createRouter({
     history: createWebHistory(),
     routes,
 });
 
-// Navigation guard to protect private routes
+// this is the navigation guard to protect private routes
 router.beforeEach((to, from, next) => {
     const store = useStore();
+    const auth = getAuth();
 
-    // this checks if the route requires authentication and if the user is logged in
-    if (to.meta.auth && !store.user) {
-        next('/login');
-    } else {
-        next(); // this proceeds to the route if authorized
-    }
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Updates the store's user data
+            store.user = user;
+        } else {
+            // Clears the store's user data if not logged in
+            store.user = null;
+        }
+
+        // used route guard logic
+        if (to.meta.auth && !store.user) {
+            next('/login'); 
+        } else {
+            next(); 
+        }
+    });
 });
 
 export default router;

@@ -33,7 +33,7 @@ const handleRegister = async () => {
     alert ("Sucessful registration")
     router.push("/movies");
   } catch (error) { 
-      alert ("This was an error registering this email!");
+      alert ("This email already exists!");
     }
 };
 
@@ -42,13 +42,13 @@ const registerByGoogle = async () => {
     const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
     const user = userCredential.user;
 
-    // checks if the user already exists in Firebase Authentication
     if (user.metadata.creationTime === user.metadata.lastSignInTime) {
       alert("Registration successful! Welcome.");
-      store.user = user;
+      store.user = user; 
       router.push("/movies");
     } else {
       alert("This Google account is already registered. Please log in instead.");
+      await store.logoutUser(); 
     }
   } catch (error) {
     alert("There was an error during registration with Google. Please try again.");
